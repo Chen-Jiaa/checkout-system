@@ -1,103 +1,233 @@
-import Image from "next/image";
+"use client"
 
-export default function Home() {
+import { useState, useEffect } from "react"
+import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { ShoppingCart, Plus, Minus, RefreshCw } from "lucide-react"
+import { useRouter } from "next/navigation"
+
+const SIZES = ["S", "M", "L", "XL", "XXL"] as const
+const PRICE_PER_ITEM = 89.0
+
+type Size = (typeof SIZES)[number]
+type CartItem = {
+  size: Size
+  quantity: number
+}
+
+type Inventory = Record<Size, number>
+
+export default function HomePage() {
+  const router = useRouter()
+  const [cart, setCart] = useState<CartItem[]>([])
+  const [inventory, setInventory] = useState<Inventory>({
+    S: 0,
+    M: 0,
+    L: 0,
+    XL: 0,
+    XXL: 0,
+  })
+  const [isLoadingInventory, setIsLoadingInventory] = useState(true)
+
+  // Load cart from localStorage and fetch inventory from Google Sheets
+  useEffect(() => {
+    const savedCart = localStorage.getItem("cart")
+    if (savedCart) {
+      setCart(JSON.parse(savedCart))
+    }
+    fetchInventory()
+  }, [])
+
+  // Save cart to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem("cart", JSON.stringify(cart))
+  }, [cart])
+
+  const fetchInventory = async () => {
+    setCart([])
+    localStorage.removeItem("cart")
+    setIsLoadingInventory(true)
+    try {
+      const response = await fetch("/api/inventory")
+      if (response.ok) {
+        const data = await response.json()
+        setInventory(data.inventory)
+      }
+    } catch (error) {
+      console.error("Error fetching inventory:", error)
+    } finally {
+      setIsLoadingInventory(false)
+    }
+  }
+
+  const addToCart = (size: Size) => {
+    if (inventory[size] <= 0) return
+
+    setCart((prevCart) => {
+      const existingItem = prevCart.find((item) => item.size === size)
+      if (existingItem) {
+        return prevCart.map((item) => (item.size === size ? { ...item, quantity: item.quantity + 1 } : item))
+      } else {
+        return [...prevCart, { size, quantity: 1 }]
+      }
+    })
+
+    // Update local inventory display (will be refreshed from sheets after purchase)
+    setInventory((prev) => ({
+      ...prev,
+      [size]: prev[size] - 1,
+    }))
+  }
+
+  const removeFromCart = (size: Size) => {
+    setCart((prevCart) => {
+      const existingItem = prevCart.find((item) => item.size === size)
+      if (existingItem && existingItem.quantity > 1) {
+        return prevCart.map((item) => (item.size === size ? { ...item, quantity: item.quantity - 1 } : item))
+      } else {
+        return prevCart.filter((item) => item.size !== size)
+      }
+    })
+
+    // Update local inventory display
+    setInventory((prev) => ({
+      ...prev,
+      [size]: prev[size] + 1,
+    }))
+  }
+
+  const getTotalItems = () => {
+    return cart.reduce((total, item) => total + item.quantity, 0)
+  }
+
+  const getTotalPrice = () => {
+    return getTotalItems() * PRICE_PER_ITEM
+  }
+
+  const handleCheckout = () => {
+    localStorage.setItem(
+      "checkoutData",
+      JSON.stringify({
+        cart,
+        totalPrice: getTotalPrice(),
+        totalItems: getTotalItems(),
+      }),
+    )
+    router.push("/checkout")
+  }
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+    <div className="min-h-screen bg-gray-900 p-4">
+      <div className="max-w-4xl mx-auto">
+        <div className="text-center mb-8 mt-8">
+          <h1 className="text-4xl font-bold text-white mb-2">Self-Checkout</h1>
+          <p className="text-gray-300">Select your size and quantity</p>
+          <Button
+            onClick={fetchInventory}
+            variant="outline"
+            size="sm"
+            className="mt-6 border-gray-600 text-gray-300 hover:bg-gray-700 bg-transparent"
+            disabled={isLoadingInventory}
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+            <RefreshCw className={`w-4 h-4 mr-2 ${isLoadingInventory ? "animate-spin" : ""}`} />
+            Refresh Stock
+          </Button>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+        {/* Size Selection */}
+        <Card className="mb-6 bg-gray-800 border-gray-700">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-white">
+              <ShoppingCart className="w-5 h-5" />
+              Select Sizes
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {SIZES.map((size) => (
+                <div key={size} className="text-center mt-2">
+                  <Button
+                    onClick={() => addToCart(size)}
+                    disabled={inventory[size] <= 0 || isLoadingInventory}
+                    className="w-full h-20 text-xl font-bold mb-2"
+                    variant={inventory[size] <= 0 ? "secondary" : "default"}
+                  >
+                    <div className="flex flex-col items-center">
+                      <span>{size}</span>
+                      <Plus className="w-4 h-4 mt-1" />
+                    </div>
+                  </Button>
+                  <Badge variant={inventory[size] <= 0 ? "destructive" : "secondary"}>
+                    {isLoadingInventory ? "Loading..." : `Stock: ${inventory[size]}`}
+                  </Badge>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Cart Summary */}
+        {cart.length > 0 && (
+          <Card className="mb-6 bg-gray-800 border-gray-700">
+            <CardHeader>
+              <CardTitle className="text-white">Your Cart</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-2">
+                {cart.map((item) => (
+                  <div key={item.size} className="flex justify-between items-center text-white">
+                    <span className="font-medium">Size {item.size}</span>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        onClick={() => removeFromCart(item.size)}
+                        size="sm"
+                        variant="outline"
+                        className="h-6 w-6 p-0 border-gray-600 text-gray-300 hover:bg-gray-700"
+                      >
+                        <Minus className="w-3 h-3" />
+                      </Button>
+                      <span>Qty: {item.quantity}</span>
+                      <Button
+                        onClick={() => addToCart(item.size)}
+                        size="sm"
+                        variant="outline"
+                        className="h-6 w-6 p-0 border-gray-600 text-gray-300 hover:bg-gray-700"
+                        disabled={inventory[item.size] <= 0}
+                      >
+                        <Plus className="w-3 h-3" />
+                      </Button>
+                    </div>
+                    <span>RM{(item.quantity * PRICE_PER_ITEM).toFixed(2)}</span>
+                  </div>
+                ))}
+                <div className="border-t border-gray-600 pt-2 mt-4">
+                  <div className="flex justify-between items-center font-bold text-lg text-white">
+                    <span>Total ({getTotalItems()} items)</span>
+                    <span>RM{getTotalPrice().toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Checkout Button */}
+        <div className="text-center">
+          <Button
+            onClick={handleCheckout}
+            disabled={cart.length === 0}
+            size="lg"
+            className={`px-8 py-4 text-lg font-semibold ${
+              cart.length > 0
+                ? "bg-green-600 hover:bg-green-700 shadow-lg transform hover:scale-105 transition-all"
+                : ""
+            }`}
+          >
+            {cart.length > 0 ? `Checkout - RM${getTotalPrice().toFixed(2)}` : "Add items to checkout"}
+          </Button>
+        </div>
+      </div>
     </div>
-  );
+  )
 }
