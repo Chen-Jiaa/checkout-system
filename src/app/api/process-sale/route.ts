@@ -102,21 +102,25 @@ ${inventoryDetails}
     const TELEGRAM_THREAD_ID = process.env.TELEGRAM_THREAD_ID
 
     if (TELEGRAM_BOT_TOKEN && TELEGRAM_CHAT_ID) {
+      const payload: Record<string, unknown> = {
+        chat_id: TELEGRAM_CHAT_ID,
+        text: message,
+        parse_mode: "HTML",
+      }
+
+      // Conditionally add thread ID for forum groups
+      if (TELEGRAM_THREAD_ID?.trim()) {
+        payload.message_thread_id = Number(TELEGRAM_THREAD_ID)
+      }
+
       const telegramRes = await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          chat_id: TELEGRAM_CHAT_ID,
-          message_thread_id: TELEGRAM_THREAD_ID ? Number(TELEGRAM_THREAD_ID) : undefined,
-          text: message,
-          parse_mode: "HTML",
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       })
 
       if (!telegramRes.ok) {
-        console.error("Failed to send Telegram message:", await telegramRes.text())
+        console.error("❌ Failed to send Telegram message:", await telegramRes.text())
       }
     }
 
