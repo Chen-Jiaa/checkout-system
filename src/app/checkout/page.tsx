@@ -73,7 +73,7 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 p-4">
+    <div className="min-h-screen bg-gray-900 p-4 py-10">
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-white mb-2">Payment</h1>
@@ -118,10 +118,10 @@ export default function CheckoutPage() {
               <div className="flex justify-center mb-4">
                 <div className="bg-white p-4 rounded-lg shadow-md">
                   <Image
-                    src="/placeholder.svg?height=150&width=150"
+                    src="/duitnow.jpg"
                     alt="Payment QR Code"
-                    width={150}
-                    height={150}
+                    width={250}
+                    height={250}
                     className="mx-auto"
                   />
                 </div>

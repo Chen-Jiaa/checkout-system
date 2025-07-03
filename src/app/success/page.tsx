@@ -15,7 +15,7 @@ export default function SuccessPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gray-900 flex items-center justify-center p-4 py-10">
       <Card className="w-full max-w-md text-center bg-gray-800 border-gray-700">
         <CardHeader>
           <div className="flex justify-center mb-4">

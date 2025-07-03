@@ -118,9 +118,9 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 p-4">
+    <div className="min-h-screen bg-gray-900 p-4 py-10">
       <div className="max-w-4xl mx-auto">
-        <div className="text-center mb-8 mt-8">
+        <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-white mb-2">Self-Checkout</h1>
           <p className="text-gray-300">Select your size and quantity</p>
           <Button
