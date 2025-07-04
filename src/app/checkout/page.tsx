@@ -168,7 +168,7 @@ export default function CheckoutPage() {
             size="sm"
             className="border-gray-300 text-gray-600 hover:bg-gray-100"
           >
-            Cancel
+            Cancel Order
           </Button>
         </div>
       </div>
