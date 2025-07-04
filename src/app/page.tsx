@@ -46,7 +46,6 @@ export default function HomePage() {
 
   const fetchInventory = async () => {
     setCart([])
-    localStorage.removeItem("cart")
     setIsLoadingInventory(true)
     try {
       const response = await fetch("/api/inventory")
@@ -118,16 +117,17 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 p-4 py-10">
+    <div className="min-h-screen bg-gray-50 p-4 py-10">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-white mb-2">Self-Checkout</h1>
-          <p className="text-gray-300">Select your size and quantity</p>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">Clothing Self-Checkout</h1>
+          <p className="text-gray-600">Select your size and quantity</p>
+          <p className="text-lg font-semibold text-gray-800 mt-2">RM{PRICE_PER_ITEM.toFixed(2)} per item</p>
           <Button
             onClick={fetchInventory}
             variant="outline"
             size="sm"
-            className="mt-6 border-gray-600 text-gray-300 hover:bg-gray-700 bg-transparent"
+            className="mt-2 border-gray-300 text-gray-600 hover:bg-gray-100 bg-transparent"
             disabled={isLoadingInventory}
           >
             <RefreshCw className={`w-4 h-4 mr-2 ${isLoadingInventory ? "animate-spin" : ""}`} />
@@ -136,17 +136,17 @@ export default function HomePage() {
         </div>
 
         {/* Size Selection */}
-        <Card className="mb-6 bg-gray-800 border-gray-700">
+        <Card className="mb-6 bg-white border-gray-200">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-white">
+            <CardTitle className="flex items-center gap-2 text-gray-900">
               <ShoppingCart className="w-5 h-5" />
               Select Sizes
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               {SIZES.map((size) => (
-                <div key={size} className="text-center mt-2">
+                <div key={size} className="text-center">
                   <Button
                     onClick={() => addToCart(size)}
                     disabled={inventory[size] <= 0 || isLoadingInventory}
@@ -169,21 +169,21 @@ export default function HomePage() {
 
         {/* Cart Summary */}
         {cart.length > 0 && (
-          <Card className="mb-6 bg-gray-800 border-gray-700">
+          <Card className="mb-6 bg-white border-gray-200">
             <CardHeader>
-              <CardTitle className="text-white">Your Cart</CardTitle>
+              <CardTitle className="text-gray-900">Your Cart</CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
                 {cart.map((item) => (
-                  <div key={item.size} className="flex justify-between items-center text-white">
+                  <div key={item.size} className="flex justify-between items-center text-gray-900">
                     <span className="font-medium">Size {item.size}</span>
                     <div className="flex items-center gap-2">
                       <Button
                         onClick={() => removeFromCart(item.size)}
                         size="sm"
                         variant="outline"
-                        className="h-6 w-6 p-0 border-gray-600 text-gray-300 hover:bg-gray-700"
+                        className="h-6 w-6 p-0 border-gray-300 text-gray-600 hover:bg-gray-100"
                       >
                         <Minus className="w-3 h-3" />
                       </Button>
@@ -192,7 +192,7 @@ export default function HomePage() {
                         onClick={() => addToCart(item.size)}
                         size="sm"
                         variant="outline"
-                        className="h-6 w-6 p-0 border-gray-600 text-gray-300 hover:bg-gray-700"
+                        className="h-6 w-6 p-0 border-gray-300 text-gray-600 hover:bg-gray-100"
                         disabled={inventory[item.size] <= 0}
                       >
                         <Plus className="w-3 h-3" />
@@ -201,8 +201,8 @@ export default function HomePage() {
                     <span>RM{(item.quantity * PRICE_PER_ITEM).toFixed(2)}</span>
                   </div>
                 ))}
-                <div className="border-t border-gray-600 pt-2 mt-4">
-                  <div className="flex justify-between items-center font-bold text-lg text-white">
+                <div className="border-t border-gray-200 pt-2 mt-4">
+                  <div className="flex justify-between items-center font-bold text-lg text-gray-900">
                     <span>Total ({getTotalItems()} items)</span>
                     <span>RM{getTotalPrice().toFixed(2)}</span>
                   </div>

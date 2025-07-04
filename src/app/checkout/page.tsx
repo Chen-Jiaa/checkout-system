@@ -64,31 +64,31 @@ export default function CheckoutPage() {
 
   if (!checkoutData) {
     return (
-      <div className="min-h-screen bg-gray-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-gray-300">Loading checkout data...</p>
+          <p className="text-gray-600">Loading checkout data...</p>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 p-4 py-10">
+    <div className="min-h-screen bg-gray-50 p-4 py-10">
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-white mb-2">Payment</h1>
-          <p className="text-gray-300">Complete your purchase</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">Payment</h1>
+          <p className="text-gray-900">Complete your purchase</p>
         </div>
 
         {/* Order Summary */}
-        <Card className="mb-6 bg-gray-800 border-gray-700">
+        <Card className="mb-6 bg-gray-50 border-gray-200">
           <CardHeader>
-            <CardTitle className="text-white">Order Summary</CardTitle>
+            <CardTitle className="text-gray-900">Order Summary</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-2">
               {checkoutData.cart.map((item) => (
-                <div key={item.size} className="flex justify-between items-center text-white">
+                <div key={item.size} className="flex justify-between items-center text-gray-900">
                   <span className="font-medium">Size {item.size}</span>
                   <span>Qty: {item.quantity}</span>
                   <span>RM{(item.quantity * 89).toFixed(2)}</span>
@@ -96,7 +96,7 @@ export default function CheckoutPage() {
               ))}
               <div className="border-t border-gray-600 pt-2 mt-4">
                 <div className="flex justify-between items-center font-bold text-xl">
-                  <span className="text-white">Total Amount</span>
+                  <span className="text-gray-900">Total Amount</span>
                   <span className="text-green-400">RM{checkoutData.totalPrice.toFixed(2)}</span>
                 </div>
               </div>
@@ -107,9 +107,9 @@ export default function CheckoutPage() {
         {/* Payment Methods */}
         <div className="grid md:grid-cols-1 gap-6 mb-6">
           {/* QR Code Payment */}
-          <Card className="bg-gray-800 border-gray-700">
+          <Card className="bg-white border-gray-200">
             <CardHeader>
-              <CardTitle className="text-center text-white flex items-center justify-center gap-2">
+              <CardTitle className="text-center text-gray-900 flex items-center justify-center gap-2">
                 <CreditCard className="w-5 h-5" />
                 QR Code Payment
               </CardTitle>
@@ -126,8 +126,8 @@ export default function CheckoutPage() {
                   />
                 </div>
               </div>
-              <p className="text-gray-300 mb-2 text-sm">Scan with your banking app</p>
-              <p className="text-xs text-gray-400 mb-4">
+              <p className="text-gray-600 mb-2 text-sm">Scan with your banking app</p>
+              <p className="text-xs text-gray-500 mb-4">
                 Amount: <span className="font-semibold">RM{checkoutData.totalPrice.toFixed(2)}</span>
               </p>
               <Button
@@ -141,9 +141,9 @@ export default function CheckoutPage() {
           </Card>
 
           {/* Cash Payment */}
-          <Card className="bg-gray-800 border-gray-700">
+          <Card className="bg-white border-gray-200">
             <CardHeader>
-              <CardTitle className="text-center text-white flex items-center justify-center gap-2">
+              <CardTitle className="text-center text-gray-900 flex items-center justify-center gap-2">
                 <Banknote className="w-5 h-5" />
                 Cash Payment
               </CardTitle>
@@ -166,9 +166,9 @@ export default function CheckoutPage() {
             onClick={() => router.push("/")}
             variant="outline"
             size="sm"
-            className="border-gray-600 text-gray-600 hover:bg-gray-700"
+            className="border-gray-300 text-gray-600 hover:bg-gray-100"
           >
-            Back to Shopping
+            Cancel
           </Button>
         </div>
       </div>
