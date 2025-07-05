@@ -7,8 +7,12 @@ import { useRouter } from "next/navigation"
 import Image from "next/image"
 import { CreditCard, Banknote } from "lucide-react"
 
+const TSHIRT_PRICE = 89
+const CAP_PRICE = 49
+
 type CheckoutData = {
   cart: Array<{ size: string; quantity: number }>
+  capCart: Array<{ color: string; quantity: number }>
   totalPrice: number
   totalItems: number
 }
@@ -42,6 +46,7 @@ export default function CheckoutPage() {
         },
         body: JSON.stringify({
           cart: checkoutData.cart,
+          capCart: checkoutData.capCart,
           totalPrice: checkoutData.totalPrice,
           totalItems: checkoutData.totalItems,
           paymentMethod,
@@ -86,19 +91,38 @@ export default function CheckoutPage() {
             <CardTitle className="text-gray-900">Order Summary</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              {checkoutData.cart.map((item) => (
-                <div key={item.size} className="flex justify-between items-center text-gray-900">
-                  <span className="font-medium">Size {item.size}</span>
-                  <span>Qty: {item.quantity}</span>
-                  <span>RM{(item.quantity * 89).toFixed(2)}</span>
-                </div>
-              ))}
-              <div className="border-t border-gray-600 pt-2 mt-4">
-                <div className="flex justify-between items-center font-bold text-xl">
-                  <span className="text-gray-900">Total Amount</span>
-                  <span className="text-green-400">RM{checkoutData.totalPrice.toFixed(2)}</span>
-                </div>
+            <div className="space-y-4 text-gray-900">
+              {/* T-Shirt Section */}
+              {checkoutData.cart.length > 0 && (
+                <>
+                  <h3 className="text-lg font-semibold border-b pb-1">T-Shirts</h3>
+                  {checkoutData.cart.map((item) => (
+                    <div key={`shirt-${item.size}`} className="flex justify-between items-center">
+                      <span className="font-medium">Size {item.size}</span>
+                      <span>Qty: {item.quantity}</span>
+                      <span>RM{(item.quantity * TSHIRT_PRICE).toFixed(2)}</span>
+                    </div>
+                  ))}
+                </>
+              )}
+
+              {/* Cap Section */}
+              {checkoutData.capCart?.length > 0 && (
+                <>
+                  <h3 className="text-lg font-semibold border-b pt-4 pb-1">Caps</h3>
+                  {checkoutData.capCart.map((item) => (
+                    <div key={`cap-${item.color}`} className="flex justify-between items-center">
+                      <span className="font-medium">Color {item.color}</span>
+                      <span>Qty: {item.quantity}</span>
+                      <span>RM{(item.quantity * CAP_PRICE).toFixed(2)}</span>
+                    </div>
+                  ))}
+                </>
+              )}
+
+              <div className="border-t border-gray-600 pt-4 mt-4 flex justify-between items-center font-bold text-xl">
+                <span>Total Amount</span>
+                <span className="text-green-400">RM{checkoutData.totalPrice.toFixed(2)}</span>
               </div>
             </div>
           </CardContent>
